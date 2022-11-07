@@ -6,7 +6,9 @@ class ReactiveEffect {
   // 运行副作用函数
   run() {
     activeEffect = this;
-    this._fn()
+    // 获取调用函数的返回值
+    const res = this._fn()
+    return res
   }
 }
 const targetMap = new WeakMap()
@@ -40,4 +42,6 @@ export function effect(fn) {
   const _effect = new ReactiveEffect(fn)
   // 执行副作用函数 其中访问对象时会进行依赖收集
   _effect.run()
+  // 返回 runner 函数
+  return _effect.run.bind(_effect)
 }
