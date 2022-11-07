@@ -1,6 +1,6 @@
 class ReactiveEffect {
   private _fn
-  constructor(fn) {
+  constructor(fn, public scheduler?) {
     this._fn = fn
   }
   // 运行副作用函数
@@ -33,13 +33,19 @@ export function trigger(target, key) {
   if (!depsMap) return
   const deps = depsMap.get(key)
   // 获取 key 所对应的依赖执行
-  deps.forEach((effect) => effect.run());
+  deps.forEach((effect) => {
+    if (effect.scheduler) {
+      effect.scheduler()
+    } else {
+      effect.run();
+    }
+  });
 }
 
 // 当前的副作用函数
 let activeEffect
-export function effect(fn) {
-  const _effect = new ReactiveEffect(fn)
+export function effect(fn, options: any = {}) {
+  const _effect = new ReactiveEffect(fn, options.scheduler)
   // 执行副作用函数 其中访问对象时会进行依赖收集
   _effect.run()
   // 返回 runner 函数

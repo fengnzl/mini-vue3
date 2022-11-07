@@ -1,8 +1,8 @@
 import { reactive } from "../reactive";
 import { effect } from "../effect";
 
-describe('effect', () => {
-  it('happy path', () => {
+describe('reactivity/effect', () => {
+  it('should handle single effect', () => {
     const user = reactive({
       age: 18,
     })
@@ -23,5 +23,36 @@ describe('effect', () => {
     const res = runner()
     expect(count).toBe(12)
     expect(res).toBe('count')
+  });
+
+  it('schedluer', () => {
+    // 1、通过 effect 的第二个参数指定名为 scheduler 的 fn
+    // 2、effect 第一次调用时，fn 仍然会调用
+    // 3、响应式数据 set 时，update 触发不会调用 fn，而是 schdeuer 执行
+    // 4、执行 runner 的时候 会再次执行 fn
+    let dummy;
+    let run: any;
+    const scheduler = jest.fn(() => {
+      run = runner;
+    });
+
+    const obj = reactive({ foo: 1 });
+    const runner = effect(
+      () => {
+        dummy = obj.foo;
+      },
+      { scheduler }
+    );
+    expect(scheduler).not.toHaveBeenCalled();
+    expect(dummy).toBe(1);
+    // should be called on first trigger
+    obj.foo++;
+    expect(scheduler).toHaveBeenCalledTimes(1);
+    // should not run yet
+    expect(dummy).toBe(1);
+    // manually run
+    run();
+    // should have run
+    expect(dummy).toBe(2);
   });
 });
