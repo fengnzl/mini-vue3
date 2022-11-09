@@ -1,5 +1,5 @@
 import { reactive } from "../reactive";
-import { effect } from "../effect";
+import { effect, stop } from "../effect";
 
 describe('reactivity/effect', () => {
   it('should handle single effect', () => {
@@ -55,4 +55,29 @@ describe('reactivity/effect', () => {
     // should have run
     expect(dummy).toBe(2);
   });
+
+  it('stop', () => {
+    let dummy;
+    const obj = reactive({ prop: 1 });
+    const runner = effect(() => (dummy = obj.prop));
+    obj.prop = 2;
+    expect(dummy).toBe(2);
+    stop(runner);
+    obj.prop = 3;
+    expect(dummy).toBe(2);
+
+    // stopped effect should still be manually callable
+    runner();
+    expect(dummy).toBe(3);
+  });
 });
+
+  it("events: onStop", () => {
+    const onStop = jest.fn();
+    const runner = effect(() => {}, {
+      onStop,
+    });
+    // 执行 stop 函数 onStop 会执行一次
+    stop(runner);
+    expect(onStop).toHaveBeenCalled();
+  });
