@@ -1,9 +1,11 @@
-import { readonly } from "../reactive";
+import { isReadonly, readonly } from "../reactive";
 describe('reactivity/reaonly', () => {
-  it('value should be same', () => {
+  it('Object', () => {
     const original = { foo: 1, bar: { barz: 2 } }
     const wrapped = readonly(original)
     expect(wrapped).not.toBe(original)
+    expect(isReadonly(original)).toBe(false)
+    expect(isReadonly(wrapped)).toBe(true)
     expect(wrapped.bar.barz).toBe(2)
   });
 
