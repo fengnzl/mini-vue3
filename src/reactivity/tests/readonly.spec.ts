@@ -1,4 +1,4 @@
-import { isReadonly, readonly } from "../reactive";
+import { isProxy, isReadonly, readonly } from "../reactive";
 describe("reactivity/reaonly", () => {
   it("Object", () => {
     const original = { foo: 1, bar: { barz: 2 } };
@@ -7,6 +7,8 @@ describe("reactivity/reaonly", () => {
     expect(isReadonly(original)).toBe(false);
     expect(isReadonly(wrapped)).toBe(true);
     expect(wrapped.bar.barz).toBe(2);
+    expect(isProxy(wrapped)).toBe(true);
+    expect(isProxy(original)).toBe(false);
   });
 
   it("should not allow mutation", () => {

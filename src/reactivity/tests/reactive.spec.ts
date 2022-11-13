@@ -1,4 +1,4 @@
-import { isReactive, reactive } from "../reactive";
+import { isProxy, isReactive, reactive } from "../reactive";
 describe("reactivity/reactive", () => {
   it("Object", () => {
     const obj = { age: 1 };
@@ -8,6 +8,8 @@ describe("reactivity/reactive", () => {
     expect(isReactive(reactiveObj)).toBe(true);
     expect(isReactive(obj)).toBe(false);
     expect(reactiveObj.age).toBe(1);
+    expect(isProxy(reactiveObj)).toBe(true);
+    expect(isProxy(obj)).toBe(false);
   });
   it("nested value should be reactive", () => {
     const original = {
