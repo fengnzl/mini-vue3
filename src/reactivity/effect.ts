@@ -66,6 +66,10 @@ export function track(target, key) {
     depsMap.set(key, (deps = new Set()));
   }
 
+  trackEffects(deps);
+}
+
+export function trackEffects(deps) {
   // 如果已经收集 则无需重复收集
   if (deps.has(activeEffect)) return;
   deps.add(activeEffect);
@@ -74,7 +78,7 @@ export function track(target, key) {
 }
 
 // 是否是正在收集依赖
-function isTracking() {
+export function isTracking() {
   return activeEffect !== undefined && shouldTrack;
 }
 
@@ -83,6 +87,10 @@ export function trigger(target, key) {
   const depsMap = targetMap.get(target);
   if (!depsMap) return;
   const deps = depsMap.get(key);
+  triggerEffects(deps);
+}
+
+export function triggerEffects(deps) {
   // 获取 key 所对应的依赖执行
   deps.forEach((effect) => {
     if (effect.scheduler) {
