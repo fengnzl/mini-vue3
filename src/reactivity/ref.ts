@@ -5,6 +5,7 @@ class RefImpl {
   private _value;
   public dep = new Set();
   private _rawValue;
+  public __v__isRef = true;
   constructor(value) {
     // 如果是对象 则需要使用 reactive 将内部属性都转换为 响应式
     this._value = convert(value);
@@ -40,4 +41,12 @@ function convert(value) {
 
 export function ref(value) {
   return new RefImpl(value);
+}
+
+export function isRef(ref) {
+  return !!ref.__v__isRef;
+}
+
+export function unRef(ref) {
+  return isRef(ref) ? ref.value : ref;
 }
