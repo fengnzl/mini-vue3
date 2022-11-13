@@ -65,6 +65,9 @@ export function track(target, key) {
   if (!deps) {
     depsMap.set(key, (deps = new Set()));
   }
+
+  // 如果已经收集 则无需重复收集
+  if (deps.has(activeEffect)) return;
   deps.add(activeEffect);
   // 将 deps 添加到 activeEffect.deps 用于 stop 函数时将依赖删除
   activeEffect.deps.push(deps);
