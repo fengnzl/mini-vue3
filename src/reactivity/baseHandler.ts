@@ -1,6 +1,6 @@
 import { track, trigger } from "./effect";
 import { ReactiveFlags, readonly, reactive, shallowReadonly } from "./reactive";
-import { isObject, extend } from "./shared/utils";
+import { isObject, extend } from "../shared/utils";
 
 function createGretter(isReadonly = false, isShallow = false) {
   return function get(target, key) {

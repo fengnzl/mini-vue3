@@ -1,4 +1,4 @@
-import { extend } from "./shared/utils";
+import { extend } from "../shared/utils";
 // 当前的副作用函数
 let activeEffect;
 // 是否应该收集依赖

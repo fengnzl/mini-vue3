@@ -1,6 +1,6 @@
 import { trackEffects, triggerEffects, isTracking } from "./effect";
 import { reactive } from "./reactive";
-import { hasChanged, isObject } from "./shared/utils";
+import { hasChanged, isObject } from "../shared/utils";
 class RefImpl {
   private _value;
   public dep = new Set();
