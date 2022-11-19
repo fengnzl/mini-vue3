@@ -10,6 +10,12 @@ export const App = {
       {
         class: "main",
         id: "main",
+        onClick() {
+          console.log("clicked");
+        },
+        onMousedown() {
+          console.log("mousedown");
+        },
       },
       // setupState
       // this.$el
