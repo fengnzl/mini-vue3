@@ -1,3 +1,4 @@
+import { hasOwn } from "../shared/utils";
 // 通用属性对应的获取方法
 // 如 $el, $data 等
 const publicPropertiesMap = {
@@ -7,10 +8,13 @@ const publicPropertiesMap = {
 export const PublicInstanceProxyHandlers = {
   get({ _: instance }, key) {
     // 先判断属性是否是 setupState 中，如果存在则 直接返回 setupState 中的值
-    const { setupState } = instance;
-    if (key in setupState) {
+    const { setupState, props } = instance;
+    if (hasOwn(setupState, key)) {
       return setupState[key];
+    } else if (hasOwn(props, key)) {
+      return props[key];
     }
+
     const publicGetter = publicPropertiesMap[key];
     if (publicGetter) {
       return publicGetter(instance);
