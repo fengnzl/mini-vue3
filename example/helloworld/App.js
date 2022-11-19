@@ -7,30 +7,18 @@ export const App = {
   // render 函数
   render() {
     window.self = this;
-    return h(
-      "div",
-      {
-        class: "main",
-        id: "main",
-        onClick() {
-          console.log("clicked");
+    return h("div", {}, [
+      h("p", {}, `hi, ${this.msg}`),
+      h(Foo, {
+        count: 1,
+        onAdd(a, b) {
+          console.log("onAdd", a, b);
         },
-        onMousedown() {
-          console.log("mousedown");
+        onAddFoo() {
+          console.log("onAddFoo");
         },
-      },
-      // setupState
-      // this.$el
-      // "hi, " + this.msg
-      // string
-      // "hi, mini-vue"
-      // array
-      // [
-      //   h("p", { class: "red" }, "red content"),
-      //   h("p", { class: "lightblue" }, "hello mini-vue"),
-      // ]
-      [h("p", {}, `hi, ${this.msg}`), h(Foo, { count: 1 })]
-    );
+      }),
+    ]);
   },
   // composition-api
   setup() {

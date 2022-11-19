@@ -11,3 +11,15 @@ export const hasChanged = (val, newVal) => {
 export const hasOwn = (target, key) => {
   return Object.prototype.hasOwnProperty.call(target, key);
 };
+
+export const camelize = (str: string) => {
+  return str.replace(/-(\w)/g, (match, p1: string) =>
+    p1 ? p1.toUpperCase() : ""
+  );
+};
+export const capitalize = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+export const toHandlerKey = (str: string) => {
+  return str ? `on${capitalize(str)}` : "";
+};
