@@ -9,8 +9,19 @@ export const Foo = {
     // 3 props 是 shallowReadonly
     props.count++;
     console.log(props);
+
+    const addEmit = () => {
+      console.log("emit add");
+      emit("add", 1, 2);
+      emit("add-foo");
+    };
+    return {
+      addEmit,
+    };
   },
   render() {
-    return h("div", {}, `Hi: ${this.count}`);
+    const btn = h("button", { onClick: this.addEmit }, "emit Btn");
+    const foo = h("div", {}, `Hi: ${this.count}`);
+    return h("div", {}, [foo, btn]);
   },
 };
