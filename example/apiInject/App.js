@@ -7,10 +7,35 @@ const Provider = {
     provide("bar", "barVal");
   },
   render() {
-    return h("div", {}, [h("p", {}, "Provider"), h(Consumer)]);
+    return h("div", {}, [h("p", {}, "Provider"), h(ConsumerTwo)]);
   },
 };
 
+const ConsumerTwo = {
+  name: "ConsumerTwo",
+  setup() {
+    provide("foo", "fooValTwo");
+    const foo = inject("foo");
+    // inject 可以传递默认值
+    const test = inject("test", "testDefault");
+    const test2 = inject("test2", () => "test2Default");
+    return {
+      foo,
+      test,
+      test2,
+    };
+  },
+  render() {
+    return h("div", {}, [
+      h(
+        "p",
+        {},
+        `ConsumerTwo-foo: ${this.foo}-test: ${this.test} - test2: ${this.test2}`
+      ),
+      h(Consumer),
+    ]);
+  },
+};
 const Consumer = {
   name: "Consumer",
   setup() {
