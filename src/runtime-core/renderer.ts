@@ -6,7 +6,11 @@ import { createAppAPI } from "./createApp";
 import { effect } from "../reactivity/effect";
 
 export function createRenderer(options) {
-  const { createElement, patchProp, insert } = options;
+  const {
+    createElement: hostCreateElement,
+    patchProp: hostPatchProp,
+    insert: hostInsert,
+  } = options;
 
   function render(vnode, container) {
     // 调用 patch 方法
@@ -58,7 +62,7 @@ export function createRenderer(options) {
   }
 
   function mountElement(vnode, container, parentComponent) {
-    const el = (vnode.el = createElement(vnode.type));
+    const el = (vnode.el = hostCreateElement(vnode.type));
     const { props, children, shapeFlag } = vnode;
     // props
     // 以 on 开头的当作是事件处理 如 onClick 事件
@@ -73,7 +77,7 @@ export function createRenderer(options) {
         // } else {
         //   el.setAttribute(key, val);
         // }
-        patchProp(el, key, val);
+        hostPatchProp(el, key, val);
       }
     }
     // children
@@ -82,7 +86,7 @@ export function createRenderer(options) {
     } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
       mountChildren(vnode, el, parentComponent);
     }
-    insert(el, container);
+    hostInsert(el, container);
   }
 
   function mountChildren(vnode, container, parentComponent) {
