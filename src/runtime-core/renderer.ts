@@ -1,5 +1,5 @@
 import { createComponentInstance, setupComponent } from "./component";
-import { isObject } from "../shared/utils";
+import { EMPTY_OBJ, isObject } from "../shared/utils";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { Fragment, Text } from "./vnode";
 import { createAppAPI } from "./createApp";
@@ -59,6 +59,30 @@ export function createRenderer(options) {
     console.log("patchElement");
     console.log("n1", n1);
     console.log("n2", n2);
+    // 更新 props
+    const oldProps = n1.props || EMPTY_OBJ;
+    const newProps = n2.props || EMPTY_OBJ;
+
+    const el = (n2.el = n1.el);
+    patchProps(el, oldProps, newProps);
+  }
+
+  function patchProps(el, oldProps, newProps) {
+    if (oldProps === newProps) return;
+    for (const key in newProps) {
+      const prevProp = oldProps[key];
+      const nextProp = newProps[key];
+      // 两者不同才做更新
+      if (prevProp !== nextProp) {
+        hostPatchProp(el, key, prevProp, nextProp);
+      }
+    }
+    // 判断老的 props 中 key 被删除情况
+    for (const key in oldProps) {
+      if (!(key in newProps)) {
+        hostPatchProp(el, key, oldProps[key], null);
+      }
+    }
   }
 
   function mountElement(vnode, container, parentComponent) {
@@ -77,7 +101,7 @@ export function createRenderer(options) {
         // } else {
         //   el.setAttribute(key, val);
         // }
-        hostPatchProp(el, key, val);
+        hostPatchProp(el, key, null, val);
       }
     }
     // children

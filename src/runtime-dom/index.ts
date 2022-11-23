@@ -4,15 +4,20 @@ function createElement(type) {
   return document.createElement(type);
 }
 
-function patchProp(el, key, val) {
+function patchProp(el, key, oldVal, newVal) {
   // 以 on 开头的当作是事件处理 如 onClick 事件
   const isOn = (key) => /^on[A-Z]/.test(key);
   if (isOn(key)) {
     // 获取事件名称
     const event = key.slice(2).toLowerCase();
-    el.addEventListener(event, val);
+    el.addEventListener(event, newVal);
   } else {
-    el.setAttribute(key, val);
+    // newVal 为 null 或者 undefined 删除 key
+    if (newVal === null || newVal === undefined) {
+      el.removeAttribute(key);
+    } else {
+      el.setAttribute(key, newVal);
+    }
   }
 }
 
