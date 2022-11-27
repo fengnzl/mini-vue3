@@ -1,4 +1,5 @@
 import { h } from "../../lib/guide-mini-vue.esm.js";
+import { ArrayToArray } from "./ArrayToArray.js";
 import { ArrayToText } from "./ArrayToText.js";
 import { TextToArray } from "./TextToArray.js";
 import { TextToText } from "./TextToText.js";
@@ -14,7 +15,9 @@ export const App = {
       // 文本变数组
       // h(TextToArray),
       // 文本变文本
-      h(TextToText),
+      // h(TextToText),
+      // 数组变数组
+      h(ArrayToArray),
     ]);
   },
 };
