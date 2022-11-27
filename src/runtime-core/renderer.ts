@@ -90,10 +90,7 @@ export function createRenderer(options) {
         hostSetElementText(container, "");
         mountChildren(c2, container, parentComponent);
       } else {
-        // 文本变文本
-        if (c1 !== c2) {
-          hostSetElementText(container, c2);
-        }
+        // 数组变数组
       }
     }
   }
