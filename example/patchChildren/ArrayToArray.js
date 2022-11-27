@@ -26,14 +26,14 @@ import { h, ref } from "../../lib/guide-mini-vue.esm.js";
 //   h("div", { key: "B" }, "B"),
 // ];
 
-// 新的比老的长  (ab)  (ab)c e1 = 1 e2 = 2 i = 2
+// 1、新的比老的长  (ab)  (ab)c e1 = 1 e2 = 2 i = 2
 // const prevChildren = [h("div", { key: "A" }, "A"), h("div", { key: "B" }, "B")];
 // const nextChildren = [
 //   h("div", { key: "A" }, "A"),
 //   h("div", { key: "B" }, "B"),
 //   h("div", { key: "C" }, "C"),
 // ];
-// 新的比老的长右侧 (ab)  dc(ab) e1 = -1 e2 = 1 i = 0
+// 2、新的比老的长右侧 (ab)  dc(ab) e1 = -1 e2 = 1 i = 0
 // const prevChildren = [h("div", { key: "A" }, "A"), h("div", { key: "B" }, "B")];
 // const nextChildren = [
 //   h("div", { key: "D" }, "D"),
@@ -42,7 +42,7 @@ import { h, ref } from "../../lib/guide-mini-vue.esm.js";
 //   h("div", { key: "B" }, "B"),
 // ];
 
-// 老的比新的长左侧 (ab)cd -> (ab) 删除
+// 3、老的比新的长左侧 (ab)cd -> (ab) 删除
 // const prevChildren = [
 //   h("div", { key: "A" }, "A"),
 //   h("div", { key: "B" }, "B"),
@@ -51,14 +51,60 @@ import { h, ref } from "../../lib/guide-mini-vue.esm.js";
 // ];
 // const nextChildren = [h("div", { key: "A" }, "A"), h("div", { key: "B" }, "B")];
 
-// 右侧 ab(cd) -> (cd)
+// 4、右侧 ab(cd) -> (cd)
+// const prevChildren = [
+//   h("div", { key: "A" }, "A"),
+//   h("div", { key: "B" }, "B"),
+//   h("div", { key: "C" }, "C"),
+//   h("div", { key: "D" }, "D"),
+// ];
+// const nextChildren = [h("div", { key: "C" }, "C"), h("div", { key: "D" }, "D")];
+
+// 中间对比 (ab)cye(fg) -> (ab)edc(fg)
+// 创建新的(d) 老的不存在，新的存在
+// 删除旧的(y) 新的不存在 老的存在
+// 移动 c, e 节点存在于新和老的里面，但是为位置变了
+
+// 5.1
+// ab(cd)fg -> ab(ec)fg
+// d 节点在新的里面没有 - 需要删除
+// c 节点 props 发生变化
+// const prevChildren = [
+//   h("div", { key: "A" }, "A"),
+//   h("div", { key: "B" }, "B"),
+//   h("div", { key: "C", id: "c-prev" }, "C"),
+//   h("div", { key: "D" }, "D"),
+//   h("div", { key: "F" }, "F"),
+//   h("div", { key: "G" }, "G"),
+// ];
+// const nextChildren = [
+//   h("div", { key: "A" }, "A"),
+//   h("div", { key: "B" }, "B"),
+//   h("div", { key: "E" }, "E"),
+//   h("div", { key: "C", id: "c-next" }, "C"),
+//   h("div", { key: "F" }, "F"),
+//   h("div", { key: "G" }, "G"),
+// ];
+
+// 5.1.1 ab(ced)fg -> ab(ec)fg
+// 中间部分 老的比新的多  那么多出来的可以直接删除（优化删除逻辑）
 const prevChildren = [
   h("div", { key: "A" }, "A"),
   h("div", { key: "B" }, "B"),
-  h("div", { key: "C" }, "C"),
+  h("div", { key: "C", id: "c-prev" }, "C"),
+  h("div", { key: "E" }, "E"),
   h("div", { key: "D" }, "D"),
+  h("div", { key: "F" }, "F"),
+  h("div", { key: "G" }, "G"),
 ];
-const nextChildren = [h("div", { key: "C" }, "C"), h("div", { key: "D" }, "D")];
+const nextChildren = [
+  h("div", { key: "A" }, "A"),
+  h("div", { key: "B" }, "B"),
+  h("div", { key: "E" }, "E"),
+  h("div", { key: "C", id: "c-next" }, "C"),
+  h("div", { key: "F" }, "F"),
+  h("div", { key: "G" }, "G"),
+];
 
 export const ArrayToArray = {
   name: "ArrayToArray",
