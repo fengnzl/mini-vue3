@@ -5,6 +5,7 @@ import { Fragment, Text } from "./vnode";
 import { createAppAPI } from "./createApp";
 import { effect } from "../reactivity/effect";
 import { shouldUpdateComponent } from "./shouldUpdateComponent";
+import { queueJobs } from "./scheduler";
 
 export function createRenderer(options) {
   const {
@@ -347,36 +348,44 @@ export function createRenderer(options) {
   function setupRenderEffect(instance, initialVnode, container, anchor) {
     // 进行渲染时的依赖收集，从而可以在改变的时候触发
     // 将 effect 返回的runner 函数挂载到 instance 上从而更新 component 时可以调用
-    instance.update = effect(() => {
-      // 只能初始化一次，后续都是更新
-      if (!instance.isMounted) {
-        console.log("init");
-        // 将 render 方法的 this 绑定为 instance 的 proxy 代理对象
-        // 从而在 h 方法中可以使用 this 获取setup 返回的属性和方法
-        const { proxy } = instance;
-        const subTree = (instance.subTree = instance.render.call(proxy));
+    instance.update = effect(
+      () => {
+        // 只能初始化一次，后续都是更新
+        if (!instance.isMounted) {
+          console.log("init");
+          // 将 render 方法的 this 绑定为 instance 的 proxy 代理对象
+          // 从而在 h 方法中可以使用 this 获取setup 返回的属性和方法
+          const { proxy } = instance;
+          const subTree = (instance.subTree = instance.render.call(proxy));
 
-        // 虚拟节点树 调用 patch
-        // vnode -> element -> mountElement
-        patch(null, subTree, container, instance, anchor);
-        // 将虚拟节点树 mountElement 时创建的 dom 树挂载到 vnode.el 属性
-        // 从而可以通过 this.$el 可以获取组件的 root dom 节点
-        initialVnode.el = subTree.el;
+          // 虚拟节点树 调用 patch
+          // vnode -> element -> mountElement
+          patch(null, subTree, container, instance, anchor);
+          // 将虚拟节点树 mountElement 时创建的 dom 树挂载到 vnode.el 属性
+          // 从而可以通过 this.$el 可以获取组件的 root dom 节点
+          initialVnode.el = subTree.el;
 
-        instance.isMounted = true;
-      } else {
-        console.log("updated");
-        const { proxy, next, vnode } = instance;
-        if (next) {
-          next.el = vnode.el;
-          updateComponentPreRender(instance, next);
+          instance.isMounted = true;
+        } else {
+          console.log("updated");
+          const { proxy, next, vnode } = instance;
+          if (next) {
+            next.el = vnode.el;
+            updateComponentPreRender(instance, next);
+          }
+          const subTree = instance.render.call(proxy);
+          const prevTree = instance.subTree;
+          patch(prevTree, subTree, container, instance, anchor);
+          instance.subTree = subTree;
         }
-        const subTree = instance.render.call(proxy);
-        const prevTree = instance.subTree;
-        patch(prevTree, subTree, container, instance, anchor);
-        instance.subTree = subTree;
+      },
+      {
+        scheduler() {
+          console.log("scheduler update");
+          queueJobs(instance.update);
+        },
       }
-    });
+    );
   }
 
   return {
