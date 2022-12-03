@@ -13,7 +13,9 @@ function parseChildren(context) {
   if (s.startsWith("{{")) {
     node = parseInterpolation(context);
   } else if (s.startsWith("<")) {
-    node = parseElement(context);
+    if (/[a-z]/.test(s[1])) {
+      node = parseElement(context);
+    }
   }
 
   nodes.push(node);
