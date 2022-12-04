@@ -3,32 +3,53 @@ import { NodeTypes } from "./ast";
 export function baseParse(content: string) {
   const context = createParserContext(content);
 
-  return createRoot(parseChildren(context));
+  return createRoot(parseChildren(context, ""));
 }
 
-function parseChildren(context) {
+function parseChildren(context, parentTag: string) {
   const nodes: any = [];
   let node;
-  const s = context.source;
-  if (s.startsWith("{{")) {
-    node = parseInterpolation(context);
-  } else if (s.startsWith("<")) {
-    if (/[a-z]/.test(s[1])) {
-      node = parseElement(context);
+  while (!isEnd(context, parentTag)) {
+    const s = context.source;
+    if (s.startsWith("{{")) {
+      node = parseInterpolation(context);
+    } else if (s.startsWith("<")) {
+      if (/[a-z]/.test(s[1])) {
+        node = parseElement(context);
+      }
     }
-  }
 
-  // 说明是文本
-  if (!node) {
-    node = parseText(context);
+    // 说明是文本
+    if (!node) {
+      node = parseText(context);
+    }
+    nodes.push(node);
   }
-  nodes.push(node);
 
   return nodes;
 }
 
+// 判断是否已经解析到结尾
+function isEnd(context, parentTag) {
+  // 2 解析到最后一个标签
+  if (context.source && context.source === `</${parentTag}>`) {
+    return true;
+  }
+
+  // 1.source 不存在的情况
+  return !context.source;
+}
+
 function parseText(context) {
-  const content = parseTextData(context, context.source.length);
+  // 找到文本 结尾索引
+  let endIndex = context.source.length;
+  const endToken = "{{";
+  // 说明找到 结尾位置
+  const index = context.source.indexOf(endToken);
+  if (index !== -1) {
+    endIndex = index;
+  }
+  const content = parseTextData(context, endIndex);
 
   console.log(context.source);
   return {
@@ -51,7 +72,10 @@ function parseTextData(context: any, length: number) {
 
 function parseElement(context) {
   // 1、解析tag
-  const element = parseTag(context, TagType.Start);
+  const element: any = parseTag(context, TagType.Start);
+
+  // 处理内部逻辑
+  element.children = parseChildren(context, element.tag);
   // 2、删除处理完成的代码
   parseTag(context, TagType.End);
   return element;
