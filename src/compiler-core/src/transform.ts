@@ -1,8 +1,15 @@
-export function transform(root, options) {
+export function transform(root, options = {}) {
   // 使用深度优先搜索进行处理
   // 修改节点值
   const context = createTransformContext(root, options);
   traverseNode(root, context);
+
+  // 创建 codegenNode
+  createRootCodegen(root);
+}
+
+function createRootCodegen(root) {
+  root.codegenNode = root.children[0];
 }
 
 function createTransformContext(root: any, options: any) {
