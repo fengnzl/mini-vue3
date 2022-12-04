@@ -32,7 +32,7 @@ function parseChildren(context, parentTag: string) {
 // 判断是否已经解析到结尾
 function isEnd(context, parentTag) {
   // 2 解析到最后一个标签
-  if (context.source && context.source === `</${parentTag}>`) {
+  if (parentTag && context.source.startsWith(`</${parentTag}>`)) {
     return true;
   }
 
@@ -43,12 +43,16 @@ function isEnd(context, parentTag) {
 function parseText(context) {
   // 找到文本 结尾索引
   let endIndex = context.source.length;
-  const endToken = "{{";
-  // 说明找到 结尾位置
-  const index = context.source.indexOf(endToken);
-  if (index !== -1) {
-    endIndex = index;
+  const endTokens = ["{{", "</"];
+  // 找到第一个文本类型的结尾
+  for (let i = 0; i < endTokens.length; i++) {
+    const endToken = endTokens[i];
+    const index = context.source.indexOf(endToken);
+    if (index !== -1 && endIndex > index) {
+      endIndex = index;
+    }
   }
+
   const content = parseTextData(context, endIndex);
 
   console.log(context.source);
