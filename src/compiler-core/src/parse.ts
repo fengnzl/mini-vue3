@@ -3,19 +3,19 @@ import { NodeTypes } from "./ast";
 export function baseParse(content: string) {
   const context = createParserContext(content);
 
-  return createRoot(parseChildren(context, ""));
+  return createRoot(parseChildren(context, []));
 }
 
-function parseChildren(context, parentTag: string) {
+function parseChildren(context, ancestors) {
   const nodes: any = [];
   let node;
-  while (!isEnd(context, parentTag)) {
+  while (!isEnd(context, ancestors)) {
     const s = context.source;
     if (s.startsWith("{{")) {
       node = parseInterpolation(context);
     } else if (s.startsWith("<")) {
       if (/[a-z]/.test(s[1])) {
-        node = parseElement(context);
+        node = parseElement(context, ancestors);
       }
     }
 
@@ -30,14 +30,20 @@ function parseChildren(context, parentTag: string) {
 }
 
 // 判断是否已经解析到结尾
-function isEnd(context, parentTag) {
+function isEnd(context, ancestors) {
+  const s = context.source;
   // 2 解析到最后一个标签
-  if (parentTag && context.source.startsWith(`</${parentTag}>`)) {
-    return true;
+  if (s.startsWith("</")) {
+    for (let i = ancestors.length - 1; i >= 0; i--) {
+      const tag = ancestors[i].tag;
+      if (startsWithEndTagOpen(s, tag)) {
+        return true;
+      }
+    }
   }
 
   // 1.source 不存在的情况
-  return !context.source;
+  return !s;
 }
 
 function parseText(context) {
@@ -74,15 +80,29 @@ function parseTextData(context: any, length: number) {
   return content;
 }
 
-function parseElement(context) {
+function parseElement(context, ancestors) {
   // 1、解析tag
   const element: any = parseTag(context, TagType.Start);
-
+  ancestors.push(element);
   // 处理内部逻辑
-  element.children = parseChildren(context, element.tag);
-  // 2、删除处理完成的代码
-  parseTag(context, TagType.End);
+  element.children = parseChildren(context, ancestors);
+  ancestors.pop();
+
+  if (startsWithEndTagOpen(context.source, element.tag)) {
+    // 2、删除处理完成的代码
+    parseTag(context, TagType.End);
+  } else {
+    throw new Error(`缺少结束标签:${element.tag}`);
+  }
+
   return element;
+}
+
+function startsWithEndTagOpen(source, tag) {
+  return (
+    source.startsWith("</") &&
+    source.slice(2, 2 + tag.length).toLowerCase() === tag.toLowerCase()
+  );
 }
 
 function parseTag(context: any, type: TagType) {
